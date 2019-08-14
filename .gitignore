@@ -1,0 +1,16 @@
+[Ll]ibrary/
+[Ll]ogs/
+[Tt]emp/
+[Oo]bj/
+[Bb]uilds/
+
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+
+Assets/Plugins/Editor/JetBrains/
+Assets/Plugins/Editor/JetBrains.meta
