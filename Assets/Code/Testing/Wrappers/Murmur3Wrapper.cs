@@ -2,29 +2,35 @@ using Hash;
 
 namespace Testing.Wrappers
 {
-    public class Murmur3Wrapper : HashGenerator<MurmurHash>
-    {
-        public override string Name => "MurMur3";
-        public override bool IsSupportsSeed => true;
+	public class Murmur3Wrapper : IHashGenerator<uint>
+	{
+		public string Name => "MurMur3";
+		public bool IsSupportsSeed => true;
 
-        protected override MurmurHash Create(int seed)
-        {
-            return new MurmurHash(seed);
-        }
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
 
-        protected override uint Hash(MurmurHash generator, int index)
-        {
-            return generator.GetHash(index);
-        }
-    }
-    
-    public class Murmur3ArrayWrapper : Murmur3Wrapper
-    {
-        public override string Name => "MurMur3 (array input)";
+		public uint Hash(uint generator, int index)
+		{
+			return MurmurHash.GetHash(index, generator);
+		}
+	}
 
-        protected override uint Hash(MurmurHash generator, int index)
-        {
-            return generator.GetHash(new[] {index});
-        }
-    }
+	public class Murmur3ArrayWrapper : IHashGenerator<uint>
+	{
+		public string Name => "MurMur3 (array input)";
+		public bool IsSupportsSeed => true;
+
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
+
+		public uint Hash(uint generator, int index)
+		{
+			return MurmurHash.GetHash(new[] {index}, generator);
+		}
+	}
 }

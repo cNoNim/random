@@ -19,7 +19,7 @@
  *
  * Contributor(s):
  * Thomas Kejser
- *    Turning this code into SQL Server CLR version 
+ *    Turning this code into SQL Server CLR version
  *    and adding MurmurHash3 implementation based on C++ source.
  * Rune Skovbo Johansen
  *    Removing all SQL dependencies (take byte array instead of SqlBinary).
@@ -43,19 +43,12 @@
 
 namespace Hash
 {
-	public class MurmurHash
+	public static class MurmurHash
 	{
-		private uint seed; /* Define your own seed here */
-
 		private const uint C1 = 0xcc9e2d51;
 		private const uint C2 = 0x1b873593;
 
-		public MurmurHash(int seed)
-		{
-			this.seed = (uint) seed;
-		}
-
-		public uint GetHash(byte[] data)
+		public static uint GetHash(byte[] data, uint seed)
 		{
 			var curLength = data.Length; // Current position in byte array
 			var length = curLength; // The const length we need to fix tail
@@ -68,47 +61,47 @@ namespace Hash
 			{
 				// Get four bytes from the input into an uint
 				k1 = (uint) (data[currentIndex++]
-				             | data[currentIndex++] << 8
-				             | data[currentIndex++] << 16
-				             | data[currentIndex++] << 24);
+				             | (data[currentIndex++] << 8)
+				             | (data[currentIndex++] << 16)
+				             | (data[currentIndex++] << 24));
 
 				// Bitmagic hash
 				k1 *= C1;
-				k1 = Rotl32(k1, 15);
+				k1 = RotL32(k1, 15);
 				k1 *= C2;
 
 				h1 ^= k1;
-				h1 = Rotl32(h1, 13);
+				h1 = RotL32(h1, 13);
 				h1 = h1 * 5 + 0xe6546b64;
 				curLength -= 4;
 			}
 
 			// Tail, the reminder bytes that did not make it to a full int.
-			// (This switch is slightly more ugly than the C++ implementation 
+			// (This switch is slightly more ugly than the C++ implementation
 			// because we can't fall through.)
 			switch (curLength)
 			{
 				case 3:
 					k1 = (uint) (data[currentIndex++]
-					             | data[currentIndex++] << 8
-					             | data[currentIndex] << 16);
+					             | (data[currentIndex++] << 8)
+					             | (data[currentIndex] << 16));
 					k1 *= C1;
-					k1 = Rotl32(k1, 15);
+					k1 = RotL32(k1, 15);
 					k1 *= C2;
 					h1 ^= k1;
 					break;
 				case 2:
 					k1 = (uint) (data[currentIndex++]
-					             | data[currentIndex] << 8);
+					             | (data[currentIndex] << 8));
 					k1 *= C1;
-					k1 = Rotl32(k1, 15);
+					k1 = RotL32(k1, 15);
 					k1 *= C2;
 					h1 ^= k1;
 					break;
 				case 1:
 					k1 = data[currentIndex];
 					k1 *= C1;
-					k1 = Rotl32(k1, 15);
+					k1 = RotL32(k1, 15);
 					k1 *= C2;
 					h1 ^= k1;
 					break;
@@ -116,13 +109,13 @@ namespace Hash
 
 			// Finalization, magic chants to wrap it all up
 			h1 ^= (uint) length;
-			h1 = Fmix(h1);
+			h1 = Mix(h1);
 
 			return h1;
 		}
 
 		// Overload optimized for int input.
-		public uint GetHash(params int[] data)
+		public static uint GetHash(int[] data, uint seed)
 		{
 			var h1 = seed;
 
@@ -138,23 +131,23 @@ namespace Hash
 
 				// Bitmagic hash
 				k1 *= C1;
-				k1 = Rotl32(k1, 15);
+				k1 = RotL32(k1, 15);
 				k1 *= C2;
 
 				h1 ^= k1;
-				h1 = Rotl32(h1, 13);
+				h1 = RotL32(h1, 13);
 				h1 = h1 * 5 + 0xe6546b64;
 			}
 
 			// Finalization, magic chants to wrap it all up
 			h1 ^= (uint) (length * 4);
-			h1 = Fmix(h1);
+			h1 = Mix(h1);
 
 			return h1;
 		}
 
 		// Overload optimized for single int input.
-		public uint GetHash(int data)
+		public static uint GetHash(int data, uint seed)
 		{
 			var h1 = seed;
 			uint k1;
@@ -166,26 +159,26 @@ namespace Hash
 
 			// Bitmagic hash
 			k1 *= C1;
-			k1 = Rotl32(k1, 15);
+			k1 = RotL32(k1, 15);
 			k1 *= C2;
 
 			h1 ^= k1;
-			h1 = Rotl32(h1, 13);
+			h1 = RotL32(h1, 13);
 			h1 = h1 * 5 + 0xe6546b64;
 
 			// Finalization, magic chants to wrap it all up
 			h1 ^= 4U;
-			h1 = Fmix(h1);
+			h1 = Mix(h1);
 
 			return h1;
 		}
 
-		private static uint Rotl32(uint x, byte r)
+		private static uint RotL32(uint x, byte r)
 		{
 			return (x << r) | (x >> (32 - r));
 		}
 
-		private static uint Fmix(uint h)
+		private static uint Mix(uint h)
 		{
 			h ^= h >> 16;
 			h *= 0x85ebca6b;

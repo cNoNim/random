@@ -2,18 +2,19 @@ using PRNG;
 
 namespace Testing.Wrappers
 {
-    public class UnityRandomWrapper : RandomNumberGenerator<UnityRandom>
-    {
-        public override string Name => "Unity Random";
-        public override bool IsSupportsSeed => true;
-        protected override UnityRandom Create(int seed)
-        {
-            return new UnityRandom(seed);
-        }
+	public class UnityRandomWrapper : IRandomNumberGenerator<UnityRandom>
+	{
+		public string Name => "Unity Random";
+		public bool IsSupportsSeed => true;
 
-        protected override uint Next(UnityRandom generator)
-        {
-            return generator.Next();
-        }
-    }
+		public UnityRandom Create(int seed)
+		{
+			return new UnityRandom(seed);
+		}
+
+		public uint Next(UnityRandom generator)
+		{
+			return generator.Next();
+		}
+	}
 }

@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: f3a326722fa147f3bb68d49bba843725, type: 3}
   m_Name: xxHash
   m_EditorClassIdentifier: Assembly-CSharp:Testing.Sequences:XxHashSequence
   _seed: 0

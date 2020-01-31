@@ -1,19 +1,21 @@
+using System;
+
 namespace Testing.Wrappers
 {
-    public class RandomWrapper : IRandomNumberGenerator
-    {
-        public string Name => nameof(System.Random);
+	public class RandomWrapper : IRandomNumberGenerator<Random>
+	{
+		public string Name => nameof(Random);
 
-        public bool IsSupportsSeed => true;
+		public bool IsSupportsSeed => true;
 
-        public object Generator(int seed)
-        {
-            return new System.Random(seed);
-        }
+		public Random Create(int seed)
+		{
+			return new Random(seed);
+		}
 
-        public uint Next(object generator)
-        {
-            return (uint) ((System.Random) generator).Next();
-        }
-    }
+		public uint Next(Random generator)
+		{
+			return (uint) generator.Next();
+		}
+	}
 }

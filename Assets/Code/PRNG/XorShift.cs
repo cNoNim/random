@@ -21,9 +21,9 @@ namespace PRNG
 		public uint Next()
 		{
 			// Xorshift algorithm from George Marsaglia's paper.
-			state ^= (state << 13);
-			state ^= (state >> 17);
-			state ^= (state << 5);
+			state ^= state << 13;
+			state ^= state >> 17;
+			state ^= state << 5;
 			return state;
 		}
 	}

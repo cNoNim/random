@@ -1,8 +1,9 @@
 namespace Testing
 {
-    public interface IRandomSequence {
-        uint Next ();
-        void Reset ();
-        string Name { get; }
-    }
+	public interface IRandomSequence
+	{
+		string Name { get; }
+		uint Next();
+		void Reset();
+	}
 }

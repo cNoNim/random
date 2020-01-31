@@ -2,33 +2,35 @@ using Hash;
 
 namespace Testing.Wrappers
 {
-    public class WangHashWrapper : HashGenerator<WangHash>
-    {
-        public override string Name => "WangHash";
-        public override bool IsSupportsSeed => true;
-        protected override WangHash Create(int seed)
-        {
-            return new WangHash(seed);
-        }
+	public class WangHashWrapper : IHashGenerator<uint>
+	{
+		public string Name => "WangHash";
+		public bool IsSupportsSeed => true;
 
-        protected override uint Hash(WangHash generator, int value)
-        {
-            return generator.GetHash(value);
-        }
-    }
-    
-    public class WangDoubleHashWrapper : HashGenerator<WangDoubleHash>
-    {
-        public override string Name => "WangDoubleHash";
-        public override bool IsSupportsSeed => true;
-        protected override WangDoubleHash Create(int seed)
-        {
-            return new WangDoubleHash(seed);
-        }
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
 
-        protected override uint Hash(WangDoubleHash generator, int value)
-        {
-            return generator.GetHash(value);
-        }
-    }
+		public uint Hash(uint generator, int value)
+		{
+			return WangHash.GetHash(value, generator);
+		}
+	}
+
+	public class WangDoubleHashWrapper : IHashGenerator<uint>
+	{
+		public string Name => "WangDoubleHash";
+		public bool IsSupportsSeed => true;
+
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
+
+		public uint Hash(uint generator, int value)
+		{
+			return WangDoubleHash.GetHash(value, generator);
+		}
+	}
 }

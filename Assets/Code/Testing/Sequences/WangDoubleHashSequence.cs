@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace Testing.Sequences
 {
-    [CreateAssetMenu(menuName = "Random Sequence/WangDoubleHash")]
-    public class WangDoubleHashSequence : HashSeedSequence<WangDoubleHashWrapper>
-    {
-    }
+	[CreateAssetMenu(menuName = "Random Sequence/WangDoubleHash")]
+	public class WangDoubleHashSequence : HashSeedSequence<WangDoubleHashWrapper, uint>
+	{
+	}
 }

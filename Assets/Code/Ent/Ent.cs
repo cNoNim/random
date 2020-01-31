@@ -1,9 +1,9 @@
-/* 
+/*
  * This source code file is in the public domain.
  * Permission to use, copy, modify, and distribute this software and its documentation
  * for any purpose and without fee is hereby granted, without any conditions or restrictions.
  * This software is provided “as is” without express or implied warranty.
- * 
+ *
  * Original version of this code can be obtained from
  * http://www.fourmilab.ch/random/
  */
@@ -13,60 +13,42 @@ using System;
 namespace Ent
 {
 	/// <summary>
-	///	Apply various randomness tests to a stream of bytes
-	///	Original code by John Walker  --  September 1996
-	///	http://www.fourmilab.ch/
-	///	
-	/// C# port of ENT (ent - pseudorandom number sequence test)
-	/// by Brett Trotter
-	/// blt@iastate.edu
+	///     Apply various randomness tests to a stream of bytes
+	///     Original code by John Walker  --  September 1996
+	///     http://www.fourmilab.ch/
+	///     C# port of ENT (ent - pseudorandom number sequence test)
+	///     by Brett Trotter
+	///     blt@iastate.edu
 	/// </summary>
-
 	public class EntCalc
 	{
-		static readonly double[,] Chsqt =
+		private static readonly double[,] Chsqt =
 		{
 			{0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.001, 0.0005, 0.0001},
 			{0.0, 0.6745, 1.2816, 1.6449, 1.9600, 2.3263, 2.5758, 3.0902, 3.2905, 3.7190}
 		};
 
-		private static readonly int Monten = 6; /* Bytes used as Monte Carlo co-ordinates
-													 * This should be no more bits than the mantissa 
-													 * of your "double" floating point type. */
+		/* Bytes used as Monte Carlo co-ordinates
+		 * This should be no more bits than the mantissa
+		 * of your "double" floating point type. */
+		private static readonly int Monten = 6;
+
+		private readonly bool binary; /* Treat input as a bitstream */
+		private readonly long[] ccount = new long[256]; /* Bins to count occurrences of values */
+		private readonly double incirc;
 
 		private readonly uint[] monte = new uint[Monten];
 		private readonly double[] prob = new double[256]; /* Probabilities per bin for entropy */
-		private readonly long[] ccount = new long[256]; /* Bins to count occurrences of values */
-		private long totalc; /* Total bytes counted */
-
-		private int mp;
-		private bool sccfirst;
-		private long inmont, mcount;
 		private double a;
 		private double cexp;
-		private readonly double incirc;
-		private double montex, montey, montepi;
-		private double scc, sccun, sccu0, scclast, scct1, scct2, scct3;
 		private double ent, chisq, datasum;
+		private long inmont, mcount;
+		private double montex, montey, montepi;
 
-		private readonly bool binary; /* Treat input as a bitstream */
-
-		public struct EntCalcResult
-		{
-			public double Entropy;
-			public double ChiSquare;
-			public double Mean;
-			public double MonteCarloPiCalc;
-			public double SerialCorrelation;
-			public long[] OccuranceCount;
-
-			public double ChiProbability;
-			public double MonteCarloErrorPct;
-			public double OptimumCompressionReductionPct;
-			public double ExpectedMeanForRandom;
-
-			public long NumberOfSamples;
-		}
+		private int mp;
+		private double scc, sccun, sccu0, scclast, scct1, scct2, scct3;
+		private bool sccfirst;
+		private long totalc; /* Total bytes counted */
 
 
 		/*  Initialise random test counters.  */
@@ -92,14 +74,14 @@ namespace Ent
 
 			incirc = Math.Pow(Math.Pow(256.0, Monten / 2) - 1, 2.0);
 
-			for (i = 0; i < 256; i++) 
+			for (i = 0; i < 256; i++)
 				ccount[i] = 0;
 
 			totalc = 0;
 		}
 
 
-		/*  AddSample  --	Add one or more bytes to accumulation.	*/
+		/*  AddSample  -- Add one or more bytes to accumulation. */
 		public void AddSample(byte[] buf)
 		{
 			foreach (var bufByte in buf)
@@ -112,13 +94,9 @@ namespace Ent
 				{
 					int c;
 					if (binary)
-					{
 						c = oc & 0x80; // Get the MSB of the byte being read in
-					}
 					else
-					{
 						c = oc;
-					}
 
 					ccount[c]++; /* Update counter for this bin */
 					totalc++;
@@ -142,10 +120,7 @@ namespace Ent
 								montey = montey * 256.0 + monte[Monten / 2 + mj];
 							}
 
-							if (montex * montex + montey * montey <= incirc)
-							{
-								inmont++;
-							}
+							if (montex * montex + montey * montey <= incirc) inmont++;
 						}
 					}
 
@@ -160,11 +135,11 @@ namespace Ent
 					}
 					else
 					{
-						scct1 = scct1 + scclast * sccun;
+						scct1 += scclast * sccun;
 					}
 
-					scct2 = scct2 + sccun;
-					scct3 = scct3 + sccun * sccun;
+					scct2 += sccun;
+					scct3 += sccun * sccun;
 					scclast = sccun;
 					oc <<= 1; // left shift by one
 				} while (binary && ++bean < 8
@@ -180,8 +155,8 @@ namespace Ent
 
 			/* Complete calculation of serial correlation coefficient */
 
-			scct1 = scct1 + scclast * sccu0;
-			scct2 = scct2 * scct2;
+			scct1 += scclast * sccu0;
+			scct2 *= scct2;
 			scc = totalc * scct3 - scct2;
 			if (scc == 0.0)
 				scc = -100000;
@@ -196,19 +171,15 @@ namespace Ent
 			{
 				prob[i] = (double) ccount[i] / totalc;
 				a = ccount[i] - cexp;
-				chisq = chisq + a * a / cexp;
+				chisq += a * a / cexp;
 				datasum += (double) i * ccount[i];
 			}
 
 			/* Calculate entropy */
 
 			for (i = 0; i < (binary ? 2 : 256); i++)
-			{
 				if (prob[i] > 0.0)
-				{
 					ent += prob[i] * Log2(1 / prob[i]);
-				}
-			}
 
 			/* Calculate Monte Carlo value for PI from percentage of hits
 			   within the circle */
@@ -222,19 +193,15 @@ namespace Ent
 			var chip = Math.Sqrt(2.0 * chisq) - Math.Sqrt(2.0 * (binary ? 1 : 255.0) - 1.0);
 			a = Math.Abs(chip);
 			for (i = 9; i >= 0; i--)
-			{
 				if (Chsqt[1, i] < a)
-				{
 					break;
-				}
-			}
 
 			chip = chip >= 0.0 ? Chsqt[0, i] : 1.0 - Chsqt[0, i];
 
 			var compReductionPct = ((binary ? 1 : 8) - ent) / (binary ? 1.0 : 8.0);
 
 			/* Return results */
-			var result = new EntCalcResult
+			return new EntCalcResult
 			{
 				Entropy = ent,
 				ChiSquare = chisq,
@@ -248,14 +215,30 @@ namespace Ent
 				OccuranceCount = ccount,
 				NumberOfSamples = totalc
 			};
-			return result;
 		}
 
 
 		/*  LOG2  --  Calculate log to the base 2  */
-		static double Log2(double x)
+		private static double Log2(double x)
 		{
 			return Math.Log(x, 2); //can use this in C#
+		}
+
+		public struct EntCalcResult
+		{
+			public double Entropy;
+			public double ChiSquare;
+			public double Mean;
+			public double MonteCarloPiCalc;
+			public double SerialCorrelation;
+			public long[] OccuranceCount;
+
+			public double ChiProbability;
+			public double MonteCarloErrorPct;
+			public double OptimumCompressionReductionPct;
+			public double ExpectedMeanForRandom;
+
+			public long NumberOfSamples;
 		}
 	}
 }

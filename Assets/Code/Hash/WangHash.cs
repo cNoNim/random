@@ -11,14 +11,7 @@ namespace Hash
 {
 	public class WangHash
 	{
-		private uint seed;
-
-		public WangHash(int seedValue)
-		{
-			seed = GetHashOfInt((uint) seedValue);
-		}
-
-		public uint GetHash(params int[] data)
+		public static uint GetHash(int[] data, uint seed)
 		{
 			var val = seed;
 			for (var i = 0; i < data.Length; i++)
@@ -26,20 +19,20 @@ namespace Hash
 			return val;
 		}
 
-		public uint GetHash(int data)
+		public static uint GetHash(int data, uint seed)
 		{
 			return GetHashOfInt(seed ^ (uint) data);
 		}
 
-		private uint GetHashOfInt(uint data)
+		private static uint GetHashOfInt(uint data)
 		{
 			var val = data;
 			// Based on Thomas Wang’s integer hash functions.
-			val = (val ^ 61) ^ (val >> 16);
+			val = val ^ 61 ^ (val >> 16);
 			val *= 9;
-			val ^= (val >> 4);
+			val ^= val >> 4;
 			val *= 0x27d4eb2d;
-			val ^= (val >> 15);
+			val ^= val >> 15;
 			return val;
 		}
 	}

@@ -2,29 +2,36 @@ using Hash;
 
 namespace Testing.Wrappers
 {
-    public class XxHashWrapper : HashGenerator<XxHash>
-    {
-        public override string Name => "xxHash";
-        public override bool IsSupportsSeed => true;
+	public class XxHashWrapper : IHashGenerator<uint>
+	{
+		public string Name => "xxHash";
+		public bool IsSupportsSeed => true;
 
-        protected override XxHash Create(int seed)
-        {
-            return new XxHash(seed);
-        }
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
 
-        protected override uint Hash(XxHash generator, int index)
-        {
-            return generator.GetHash(index);
-        }
-    }
-    
-    public class XxHashArrayWrapper : XxHashWrapper
-    {
-        public override string Name => "xxHash (array input)";
+		public uint Hash(uint generator, int index)
+		{
+			return XxHash.GetHash(index, generator);
+		}
+	}
 
-        protected override uint Hash(XxHash generator, int index)
-        {
-            return generator.GetHash(new[] {index});
-        }
-    }
+	public class XxHashArrayWrapper : IHashGenerator<uint>
+	{
+		public string Name => "xxHash (array input)";
+
+		public bool IsSupportsSeed => true;
+
+		public uint Create(int seed)
+		{
+			return (uint) seed;
+		}
+
+		public uint Hash(uint generator, int index)
+		{
+			return XxHash.GetHash(new[] {index}, generator);
+		}
+	}
 }

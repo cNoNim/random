@@ -37,20 +37,13 @@ namespace Hash
 {
 	public class XxHash
 	{
-		private readonly uint seed;
+		private const uint P1 = 2654435761U;
+		private const uint P2 = 2246822519U;
+		private const uint P3 = 3266489917U;
+		private const uint P4 = 668265263U;
+		private const uint P5 = 374761393U;
 
-		const uint PRIME32_1 = 2654435761U;
-		const uint PRIME32_2 = 2246822519U;
-		const uint PRIME32_3 = 3266489917U;
-		const uint PRIME32_4 = 668265263U;
-		const uint PRIME32_5 = 374761393U;
-
-		public XxHash(int seed)
-		{
-			this.seed = (uint) seed;
-		}
-
-		public uint GetHash(byte[] buf)
+		public static uint GetHash(byte[] buf, uint seed)
 		{
 			uint h32;
 			var index = 0;
@@ -59,56 +52,56 @@ namespace Hash
 			if (len >= 16)
 			{
 				var limit = len - 16;
-				var v1 = seed + PRIME32_1 + PRIME32_2;
-				var v2 = seed + PRIME32_2;
+				var v1 = seed + P1 + P2;
+				var v2 = seed + P2;
 				var v3 = seed + 0;
-				var v4 = seed - PRIME32_1;
+				var v4 = seed - P1;
 
 				do
 				{
-					v1 = CalcSubHash(v1, buf, index);
+					v1 = SubHash(v1, buf, index);
 					index += 4;
-					v2 = CalcSubHash(v2, buf, index);
+					v2 = SubHash(v2, buf, index);
 					index += 4;
-					v3 = CalcSubHash(v3, buf, index);
+					v3 = SubHash(v3, buf, index);
 					index += 4;
-					v4 = CalcSubHash(v4, buf, index);
+					v4 = SubHash(v4, buf, index);
 					index += 4;
 				} while (index <= limit);
 
-				h32 = RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
+				h32 = Rot32(v1, 1) + Rot32(v2, 7) + Rot32(v3, 12) + Rot32(v4, 18);
 			}
 			else
 			{
-				h32 = seed + PRIME32_5;
+				h32 = seed + P5;
 			}
 
 			h32 += (uint) len;
 
 			while (index <= len - 4)
 			{
-				h32 += BitConverter.ToUInt32(buf, index) * PRIME32_3;
-				h32 = RotateLeft(h32, 17) * PRIME32_4;
+				h32 += BitConverter.ToUInt32(buf, index) * P3;
+				h32 = Rot32(h32, 17) * P4;
 				index += 4;
 			}
 
 			while (index < len)
 			{
-				h32 += buf[index] * PRIME32_5;
-				h32 = RotateLeft(h32, 11) * PRIME32_1;
+				h32 += buf[index] * P5;
+				h32 = Rot32(h32, 11) * P1;
 				index++;
 			}
 
 			h32 ^= h32 >> 15;
-			h32 *= PRIME32_2;
+			h32 *= P2;
 			h32 ^= h32 >> 13;
-			h32 *= PRIME32_3;
+			h32 *= P3;
 			h32 ^= h32 >> 16;
 
 			return h32;
 		}
 
-		public uint GetHash(params uint[] buf)
+		public static uint GetHash(int[] buf, uint seed)
 		{
 			uint h32;
 			var index = 0;
@@ -117,131 +110,76 @@ namespace Hash
 			if (len >= 4)
 			{
 				var limit = len - 4;
-				var v1 = seed + PRIME32_1 + PRIME32_2;
-				var v2 = seed + PRIME32_2;
+				var v1 = seed + P1 + P2;
+				var v2 = seed + P2;
 				var v3 = seed + 0;
-				var v4 = seed - PRIME32_1;
+				var v4 = seed - P1;
 
 				do
 				{
-					v1 = CalcSubHash(v1, buf[index]);
+					v1 = SubHash(v1, (uint) buf[index]);
 					index++;
-					v2 = CalcSubHash(v2, buf[index]);
+					v2 = SubHash(v2, (uint) buf[index]);
 					index++;
-					v3 = CalcSubHash(v3, buf[index]);
+					v3 = SubHash(v3, (uint) buf[index]);
 					index++;
-					v4 = CalcSubHash(v4, buf[index]);
+					v4 = SubHash(v4, (uint) buf[index]);
 					index++;
 				} while (index <= limit);
 
-				h32 = RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
+				h32 = Rot32(v1, 1) + Rot32(v2, 7) + Rot32(v3, 12) + Rot32(v4, 18);
 			}
 			else
 			{
-				h32 = seed + PRIME32_5;
+				h32 = seed + P5;
 			}
 
 			h32 += (uint) len * 4;
 
 			while (index < len)
 			{
-				h32 += buf[index] * PRIME32_3;
-				h32 = RotateLeft(h32, 17) * PRIME32_4;
+				h32 += (uint) buf[index] * P3;
+				h32 = Rot32(h32, 17) * P4;
 				index++;
 			}
 
 			h32 ^= h32 >> 15;
-			h32 *= PRIME32_2;
+			h32 *= P2;
 			h32 ^= h32 >> 13;
-			h32 *= PRIME32_3;
+			h32 *= P3;
 			h32 ^= h32 >> 16;
 
 			return h32;
 		}
 
-		public uint GetHash(params int[] buf)
+		public static uint GetHash(int buf, uint seed)
 		{
-			uint h32;
-			var index = 0;
-			var len = buf.Length;
-
-			if (len >= 4)
-			{
-				var limit = len - 4;
-				var v1 = seed + PRIME32_1 + PRIME32_2;
-				var v2 = seed + PRIME32_2;
-				var v3 = seed + 0;
-				var v4 = seed - PRIME32_1;
-
-				do
-				{
-					v1 = CalcSubHash(v1, (uint) buf[index]);
-					index++;
-					v2 = CalcSubHash(v2, (uint) buf[index]);
-					index++;
-					v3 = CalcSubHash(v3, (uint) buf[index]);
-					index++;
-					v4 = CalcSubHash(v4, (uint) buf[index]);
-					index++;
-				} while (index <= limit);
-
-				h32 = RotateLeft(v1, 1) + RotateLeft(v2, 7) + RotateLeft(v3, 12) + RotateLeft(v4, 18);
-			}
-			else
-			{
-				h32 = seed + PRIME32_5;
-			}
-
-			h32 += (uint) len * 4;
-
-			while (index < len)
-			{
-				h32 += (uint) buf[index] * PRIME32_3;
-				h32 = RotateLeft(h32, 17) * PRIME32_4;
-				index++;
-			}
-
-			h32 ^= h32 >> 15;
-			h32 *= PRIME32_2;
-			h32 ^= h32 >> 13;
-			h32 *= PRIME32_3;
-			h32 ^= h32 >> 16;
-
-			return h32;
-		}
-
-		public uint GetHash(int buf)
-		{
-			var h32 = seed + PRIME32_5;
+			var h32 = seed + P5;
 			h32 += 4U;
-			h32 += (uint) buf * PRIME32_3;
-			h32 = RotateLeft(h32, 17) * PRIME32_4;
+			h32 += (uint) buf * P3;
+			h32 = Rot32(h32, 17) * P4;
 			h32 ^= h32 >> 15;
-			h32 *= PRIME32_2;
+			h32 *= P2;
 			h32 ^= h32 >> 13;
-			h32 *= PRIME32_3;
+			h32 *= P3;
 			h32 ^= h32 >> 16;
 			return h32;
 		}
 
-		private static uint CalcSubHash(uint value, byte[] buf, int index)
+		private static uint SubHash(uint value, byte[] buf, int index)
 		{
-			var readValue = BitConverter.ToUInt32(buf, index);
-			value += readValue * PRIME32_2;
-			value = RotateLeft(value, 13);
-			value *= PRIME32_1;
+			return SubHash(value, BitConverter.ToUInt32(buf, index));
+		}
+
+		private static uint SubHash(uint value, uint readValue)
+		{
+			value += readValue * P2;
+			value = Rot32(value, 13);
+			value *= P1;
 			return value;
 		}
 
-		private static uint CalcSubHash(uint value, uint readValue)
-		{
-			value += readValue * PRIME32_2;
-			value = RotateLeft(value, 13);
-			value *= PRIME32_1;
-			return value;
-		}
-
-		private static uint RotateLeft(uint value, int count)
+		private static uint Rot32(uint value, int count)
 		{
 			return (value << count) | (value >> (32 - count));
 		}

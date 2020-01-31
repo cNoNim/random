@@ -9,16 +9,9 @@
 
 namespace Hash
 {
-	public class WangDoubleHash
+	public static class WangDoubleHash
 	{
-		private uint seed;
-
-		public WangDoubleHash(int seedValue)
-		{
-			seed = GetHashOfInt((uint) seedValue);
-		}
-
-		public uint GetHash(params int[] data)
+		public static uint GetHash(int[] data, uint seed)
 		{
 			var val = seed;
 			for (var i = 0; i < data.Length; i++)
@@ -26,12 +19,12 @@ namespace Hash
 			return val;
 		}
 
-		public uint GetHash(int data)
+		public static uint GetHash(int data, uint seed)
 		{
 			return GetHashOfInt(seed ^ (uint) data);
 		}
 
-		private uint GetHashOfInt(uint data)
+		private static uint GetHashOfInt(uint data)
 		{
 			var val = data;
 

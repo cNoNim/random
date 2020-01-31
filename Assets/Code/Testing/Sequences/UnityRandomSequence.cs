@@ -1,10 +1,11 @@
+using PRNG;
 using Testing.Wrappers;
 using UnityEngine;
 
 namespace Testing.Sequences
 {
-    [CreateAssetMenu(menuName = "Random Sequence/Unity Random")]
-    public class UnityRandomSequence : RandomNumberGeneratorSeedSequence<UnityRandomWrapper>
-    {
-    }
+	[CreateAssetMenu(menuName = "Random Sequence/Unity Random")]
+	public class UnityRandomSequence : RandomNumberGeneratorSeedSequence<UnityRandomWrapper, UnityRandom>
+	{
+	}
 }
