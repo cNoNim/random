@@ -94,11 +94,6 @@ namespace PRNG
 		/** Current index in the bytes pool. */
 		private uint mti;
 
-		public MersenneTwister64(ulong seed)
-		{
-			SetSeedInternal(new[] {seed});
-		}
-
 		public MersenneTwister64(ulong[] seed)
 		{
 			SetSeedInternal(seed);
