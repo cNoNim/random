@@ -46,6 +46,12 @@ namespace Frontend
 		private GUIStyle stats;
 		private GUIStyle style;
 
+		private static void SaveTextureAsPNG(Texture2D texture, string fullPath)
+		{
+			byte[] bytes = texture.EncodeToPNG();
+			System.IO.File.WriteAllBytes(fullPath, bytes);
+		}
+
 		private void Start()
 		{
 			foreach (var sequence in _sequences)
@@ -63,6 +69,26 @@ namespace Frontend
 			StartCoroutine(Initialization());
 		}
 
+		private void SaveRandomSequence(TestFront front, string path)
+		{
+			var dirName = System.IO.Path.GetDirectoryName(path);
+			if (!System.IO.Directory.Exists(dirName))
+			{
+				if (string.IsNullOrEmpty(dirName))
+				{
+					Debug.LogError("Path is null");
+				}
+				else
+				{
+					System.IO.Directory.CreateDirectory(dirName);
+				}
+			}
+
+			SaveTextureAsPNG(front.CoordTexture, path + front.Test.Name + " coordinate.png");
+			SaveTextureAsPNG(front.NoiseTexture, path + front.Test.Name + " noise.png");
+			Debug.Log(Application.dataPath + front.Test.Name + " saved.");
+		}
+
 		private IEnumerator Initialization()
 		{
 			foreach (var test in tests)
@@ -72,6 +98,10 @@ namespace Frontend
 
 				yield return null;
 				Initialize(test);
+				if (test.Initialized)
+				{
+					SaveRandomSequence(test,Application.dataPath + "/results_images/");
+				}
 			}
 		}
 
@@ -89,8 +119,8 @@ namespace Frontend
 			for (var j = front.NoiseTexture.height - 1; j >= 0; j--)
 			for (var i = 0; i < front.NoiseTexture.width; i++)
 			{
-				var f = test.NoiseSequence[i + j * 256];
-				front.NoiseTexture.SetPixel(i, j, new Color(f, f, f, 1));
+				var color = RandomnessTest.GetColor(test.NoiseSequence[i + j * 256]);
+				front.NoiseTexture.SetPixel(i, j, color);
 			}
 
 			front.NoiseTexture.Apply();
