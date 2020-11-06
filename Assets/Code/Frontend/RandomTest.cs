@@ -46,6 +46,12 @@ namespace Frontend
 		private GUIStyle stats;
 		private GUIStyle style;
 
+		private static void SaveTextureAsPNG(Texture2D texture, string fullPath)
+		{
+			byte[] bytes = texture.EncodeToPNG();
+			System.IO.File.WriteAllBytes(fullPath, bytes);
+		}
+
 		private void Start()
 		{
 			foreach (var sequence in _sequences)
@@ -72,6 +78,12 @@ namespace Frontend
 
 				yield return null;
 				Initialize(test);
+				if (test.Initialized)
+				{
+					SaveTextureAsPNG(test.CoordTexture, Application.dataPath + test.Test.Name + " coordinate.png");
+					SaveTextureAsPNG(test.NoiseTexture, Application.dataPath + test.Test.Name + " noise.png");
+					Debug.Log(Application.dataPath + test.Test.Name + " saved.");
+				}
 			}
 		}
 

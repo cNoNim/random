@@ -112,7 +112,7 @@ namespace Testing
 		{
 			get
 			{
-				if (initialized)
+				if (generator != null && initialized)
 					return generator;
 				initialized = true;
 				return generator = Wrapper.Create(_seed);
