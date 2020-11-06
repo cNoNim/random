@@ -22,7 +22,7 @@ namespace Testing
 		public readonly float[,] CoordsArray = new float[256, 256];
 		private readonly float[] diagonalSums = new float[256];
 		public readonly string Name;
-		public readonly float[] NoiseSequence = new float[256 * 256];
+		public readonly uint[] NoiseSequence = new uint[256 * 256];
 		private readonly IRandomSequence sequence;
 		private float diagonalsDeviation;
 		public string Result;
@@ -33,7 +33,15 @@ namespace Testing
 			Name = sequence.Name.Replace("#", "0\u2026n");
 		}
 
-		private uint GetBytePart(uint i, int byteIndex)
+		public static Color GetColor(uint i)
+		{
+			float r = GetBytePart(i, 0) / 255f;
+			float g = GetBytePart(i, 1) / 255f;
+			float b = GetBytePart(i, 2) / 255f;
+			return new Color(r, g, b);
+		}
+
+		public static uint GetBytePart(uint i, int byteIndex)
 		{
 			return ((i >> (8 * byteIndex)) % 256 + 256) % 256;
 		}
@@ -67,7 +75,7 @@ namespace Testing
 
 			// Create noise sequence
 			for (var i = 0; i < NoiseSequence.Length; i++)
-				NoiseSequence[i] = GetBytePart(ints[i], ByteIndex) / 255f;
+				NoiseSequence[i] = ints[i];
 
 			// Create coords data
 			var max = 0;
